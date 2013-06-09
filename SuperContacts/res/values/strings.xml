@@ -2,9 +2,13 @@
 <resources>
 
     <string name="app_name">SuperContacts</string>
+    
     <string name="action_settings">Settings</string>
+    <string name="action_search">Search</string>
+    
     <string name="hello_world">Hello world!</string>
     <string name="emptyname">_</string>
     <string name="emptyphone">000-00-00-000</string>
+    
 
 </resources>

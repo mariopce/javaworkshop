@@ -10,12 +10,14 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.widget.SearchView.OnQueryTextListener;
 
-public class ContactListFragment extends ListFragment {
+public class ContactListFragment extends ListFragment implements OnQueryTextListener {
 
 	private static final int ID = 0;
 	private ContactsCursorAdapter mAdapter;
 	private String mFilter = "";
+	private LoaderCallbacks<Cursor> mLoaderCallback;
 	public ContactListFragment() {
 	}
 	
@@ -25,7 +27,8 @@ public class ContactListFragment extends ListFragment {
 		setEmptyText("No contacts");
 		mAdapter = new ContactsCursorAdapter(getActivity(), null, false);
 		setListAdapter(mAdapter);
-		LoaderManager.LoaderCallbacks<Cursor> loaderCallback = new LoaderCallbacks<Cursor>() {
+		
+		mLoaderCallback = new LoaderCallbacks<Cursor>() {
 			
 			// These are the Contacts rows that we will retrieve.
 		    final String[] CONTACTS_SUMMARY_PROJECTION = new String[] {
@@ -48,7 +51,8 @@ public class ContactListFragment extends ListFragment {
 			public Loader<Cursor> onCreateLoader(int id, Bundle options) {
 				Uri baseUri =  ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
 				if (mFilter.length()>0){
-					baseUri = ContactsContract.CommonDataKinds.Phone.CONTENT_FILTER_URI;
+					baseUri = Uri.withAppendedPath(ContactsContract.CommonDataKinds.Phone.CONTENT_FILTER_URI,
+			                  Uri.encode(mFilter));
 				}
 		        // Now create and return a CursorLoader that will take care of
 		        // creating a Cursor for the data being displayed.
@@ -60,7 +64,23 @@ public class ContactListFragment extends ListFragment {
 		                Contacts.DISPLAY_NAME + " COLLATE LOCALIZED ASC");
 			}
 		};
-		getLoaderManager().initLoader(ID,null, loaderCallback).forceLoad();
+		getLoaderManager().initLoader(ID,null, mLoaderCallback).forceLoad();
+	}
+
+	@Override
+	public boolean onQueryTextChange(String query) {
+		   // Called when the action bar search text has changed.  Update
+        // the search filter, and restart the loader to do a new query
+        // with this filter.
+        mFilter = query;
+        getLoaderManager().restartLoader(0, null, mLoaderCallback);
+        return true;
+	}
+
+	@Override
+	public boolean onQueryTextSubmit(String query) {
+		 // Don't care about this.
+        return true;
 	}
 	
 	
